@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" th:src="@{/js/app.js}"></script>
+    <script type="text/javascript" th:src="@{/js/chance.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/app.css}"/>
+    <title>Рандомайзер юзеров</title>
+    <script type="text/javascript">
+
+        function newUser(user, i)
+        {
+            csrf = document.getElementById("csrf-id");
+            csrf_name = csrf.getAttribute('name');
+            csrf_value = csrf.value;
+            try {
+                axiosInstance({
+                    method: 'POST',
+                    url: "/api/v1/auth/signup",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        csrf_name: csrf_value
+                    },
+                    data: user
+                }).then(response => {
+                    if (response.status == 200) {
+                        console.log("added rnd-" + user.secret.username)
+                        document.getElementById('result').innerText = i.toString();
+                    }
+                }).catch(function (error) {
+                    console.log(error.response.data.msg);
+                });
+            } catch (errors) {
+                console.error(errors);
+            }
+        }
+
+        function createRandomUsers(count, bulked)
+        {
+            //logopass = chance.unique(function () {return chance.hammertime();}, count);
+            let i = 0;
+            let k = -1;
+            let users = [];
+            for (i = 1; i <= count; i++) {
+                k++;
+                let user = {"secret":{}, "user":{}, "hobbies":[]};
+                time = Date.now().toString();
+                user.secret.username = 'rnd-' + time + "-" + i.toString();
+                user.secret.password = time;
+                user.user.firstName = chance.first();
+                user.user.lastName = chance.last();
+                user.user.age = chance.age();
+                user.user.gender = chance.pickone(['f', 'm']);
+                user.user.city = chance.city();
+                user.hobbies = chance.pickset([1, 2, 3, 4, 5, 6, 7, 8, 9], 3);
+                if (!bulked)
+                    setTimeout(newUser(user, i), 100);
+                else
+                    users[k] = user;
+                if (bulked && i % 1000 === 0 && i > 0) {
+                    setTimeout(newUsersBulk(users), 100);
+                    users = [];
+                    k = -1;
+                }
+            }
+            if (bulked && k >= 0)
+                setTimeout(newUsersBulk(users), 100);
+        }
+
+        function newUsersBulk(users)
+        {
+            console.log(users);
+            csrf = document.getElementById("csrf-id");
+            csrf_name = csrf.getAttribute('name');
+            csrf_value = csrf.value;
+            try {
+                axiosInstance({
+                    method: 'POST',
+                    url: "/api/v1/auth/signupbulk",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        csrf_name: csrf_value
+                    },
+                    data: users
+                }).then(response => {
+                    if (response.status == 200) {
+                        console.log("added bulk users " + users.length)
+                        document.getElementById('result').innerText = 'Пользователи добавлены';
+                    }
+                }).catch(function (error) {
+                    console.log(error.response.data.msg);
+                });
+            } catch (errors) {
+                console.error(errors);
+            }
+            //return  () => {};
+        }
+    </script>
+</head>
+<body>
+    <input id="count-id" value="10000">
+    <button onclick="createRandomUsers(document.getElementById('count-id').value,true)">Добавить пользователей</button><br>
+    <div>
+        Результат: <span id="result"></span>
+    </div>
+    <form th:method="post" th:action="@{/dosignin}">
+        <input type="hidden" id="csrf-id" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+    </form>
+</body>
+</html>

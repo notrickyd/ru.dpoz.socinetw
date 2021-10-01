@@ -1,0 +1,54 @@
+* {
+    font-family: "Segoe UI", serif;
+    font-size: medium;
+    font-style: normal;
+    margin: 5px;
+}
+
+h1 {
+    font-size: xx-large;
+}
+
+h2 {
+    font-size: x-large;
+}
+
+h3 {
+    font-size: larger;
+}
+
+h4 {
+    font-size: large;
+}
+
+a, a:visited {
+    text-decoration-line: none;
+    color: royalblue;
+}
+a.same-page{
+    text-decoration-line: underline;
+}
+
+div.user_in_list {
+    margin: 10px;
+    border-bottom: 1px solid lightgray;
+}
+
+form.signout_form {
+    margin: 0px;
+    display: inline;
+    padding: 0px;
+}
+
+form.signout_form input[type=submit] {
+    border: none;
+    background: none;
+    font: inherit;
+    color: goldenrod;
+    cursor: pointer;
+}
+
+div.paginator {
+    width: 100%;
+   /* overflow-x: scroll;*/
+}

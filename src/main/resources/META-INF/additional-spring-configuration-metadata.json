@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "custom.tokens.expire-days",
+      "type": "java.lang.String",
+      "description": "Кол-во дней для проверки протухания токенов пользователей"
+  }
+] }

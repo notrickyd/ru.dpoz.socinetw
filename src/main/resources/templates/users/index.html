@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script type="text/javascript" th:src="@{/js/app.js}"></script>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/app.css}"/>
+
+  <title th:text="'Поиск друзей'"></title>
+</head>
+<body>
+    <div th:replace="layout/header/menu-top :: menu-top"></div>
+    <h2>Пользователи</h2><br>
+    <div th:each="user: ${users}" th:class="'user_in_list'">
+        <p th:text="${user.firstName + ' ' + user.lastName}" style="font-weight: bold;"></p>
+        <p>
+            <span th:switch="${user.gender}">
+                <span th:case="'m'" th:text="'Мужчина, '"/>
+                <span th:case="'f'" th:text="'Женщина, '"/>
+            </span>
+            <span th:text="${user.age} + ' лет, '"/>
+            <span th:text="'город: ' + ${user.city}"/>
+        </p>
+        <a th:href="'javascript:addFriend(\'' + ${user.userId} + '\');'">Зафрендить</a>
+    </div>
+    <div id="paginator" th:class="'paginator'">
+        <span th:each="page: ${pages}" th:switch="${page}">
+            <span th:case="'...'" th:text="${page} + ' '"></span>
+            <a th:case="*" th:href="'/users/?p=' + ${page}" th:text="${page} + ' '"></a>
+        </span>
+    </div>
+    <input type="hidden" id="csrf-id" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+</body>
+</html>

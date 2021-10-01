@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script type="text/javascript" th:src="@{/js/app.js}"></script>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/app.css}"/>
+
+  <title th:text="'Поиск друзей'"></title>
+</head>
+<body>
+  <div th:replace="layout/header/menu-top :: menu-top"></div>
+  <h2>Введите часть имени и фамилии для поиска. Пример: "fre joh"</h2><br>
+  <input type="text" id="name-id"><button onclick="findUsers(document.getElementById('name-id').value)">Поиск</button>
+  <div id="foundUsers-id" th:class="'user_in_list'">
+  </div>
+  <input type="hidden" id="csrf-id" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+</body>
+</html>

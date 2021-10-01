@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+  <div th:fragment="usersSearchResult" id="usersSearchResult">
+      <div>
+          <h3 th:text="'Найдено ' + ${#lists.size(users)} + ' пользователей'"></h3>
+          <hr/>
+      </div>
+      <div th:each="user: ${users}" th:cl-ass="'user_in_list'" id="list-id">
+          <p th:text="${user.firstName + ' ' + user.lastName}" style="font-weight: bold;"></p>
+          <p>
+              <span th:switch="${user.gender}">
+                  <span th:case="'m'" th:text="'Мужчина, '"/>
+                  <span th:case="'f'" th:text="'Женщина, '"/>
+              </span>
+              <span th:text="${user.age} + ' лет, '"/>
+              <span th:text="'город: ' + ${user.city}"/>
+          </p>
+          <a th:href="'javascript:addFriend(\'' + ${user.userId} + '\');'">Зафрендить</a>
+      </div>
+  </div>
+
+</body>
+</html>

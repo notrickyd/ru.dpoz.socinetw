@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Регистрация - Socnetw</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" th:src="@{/js/app.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<form name="signUpInfo" id="signUpInfo" th:action="@{/signup}" th:method="post">
+    Логин<br>
+    <input name="secret.username"/><br>
+    Пароль<br>
+    <input name="secret.password"/><br>
+    <hr/>
+    Имя<br>
+    <input name="user.firstName"/><br>
+    Фамилия<br>
+    <input name="user.lastName"/><br>
+    Возраст<br>
+    <input name="user.age"/><br>
+    Пол
+    <input name="user.gender" type="radio" value="f" th:text="'Ж'"/><input name="user.gender" type="radio" value="m" th:text="'М'"/><br>
+    Город<br>
+    <input name="user.city"/><br>
+    Интересы<br>
+    <div th:each="hobby: ${hobbyList}">
+        <input  name="hobbies" th:value = "${hobby.getHobbyId()}" type="checkbox" th:text="${hobby.getName()}"><br>
+    </div>
+    <hr/>
+    <input type="button" value="Зарегистрировать" onclick="signUpMethod()"/>
+    <input type="hidden" id="csrf-id" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+</form>
+</body>
+</html>

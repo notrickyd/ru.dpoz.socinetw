@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Socnetw</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" th:src="@{/js/app.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/app.css}"/>
+</head>
+<body>
+    <div th:replace="layout/header/menu-top :: menu-top"></div>
+    <div th:text="'Привет. Ты попал на страницу прототипа социальной сети высокой нагрузки socnetw.'"></div>
+    <div th:text="'Сейчас ' + ${time}"></div>
+</body>
+</html>
