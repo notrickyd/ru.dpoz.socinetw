@@ -1,2 +1,2 @@
-# ru.dpoz.socnetw
+# ru.dpoz.socinetw
 Homework at highload course
