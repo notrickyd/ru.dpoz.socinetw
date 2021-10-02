@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.dpoz</groupId>
-    <artifactId>socnetw</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>socnetw</name>
+    <artifactId>socinetw</artifactId>
+    <version>0.1.1</version>
+    <name>socinetw</name>
     <description>Demo project for Spring Boot</description>
     <properties>
         <java.version>14</java.version>
@@ -21,11 +21,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
-        <!--dependency>
-            <groupId>nz.net.ultraq.thymeleaf</groupId>
-            <artifactId>thymeleaf-layout-dialect</artifactId>
-            <version>2.5.3</version>
-        </dependency-->
         <dependency>
             <groupId>org.thymeleaf.extras</groupId>
             <artifactId>thymeleaf-extras-springsecurity5</artifactId>
