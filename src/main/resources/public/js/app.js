@@ -75,6 +75,47 @@ function addFriend(userId)
     }
 }
 
+function addNewsMethod()
+{
+    csrf = document.getElementById("csrf-id");
+    csrf_name = csrf.getAttribute('name');
+    csrf_value = csrf.value;
+    const data = new FormData(document.forms.namedItem('feedAdd'));
+    let body = {};
+    body['id'] = null;
+    body['message'] = data.get('message');
+    body['timestampx'] = null;
+    //body['userId'] = '0-0-0-0-0';
+    try {
+        axiosInstance({
+            method: 'post',
+            url: "/api/v1/feed/add",
+            headers: {
+                csrf_name: csrf_value,
+                'Content-Type' : 'application/json'
+            },
+            data: body
+        }).then((response) => {
+                switch(response.status) {
+                    case 200:
+                        "return";
+                        break;
+                    default:
+                        alert(response.data.msg);
+               }})
+            .catch(function (error){
+                switch(error.response.status) {
+                    case 302:
+                        window.location.href = error.response.data.data.url;
+                        break;
+                    default:
+                        alert(error.response.data.msg);
+                }})
+    }catch (errors) {
+        console.error(errors);
+    }
+}
+
 function findUsers(name)
 {
     csrf = document.getElementById("csrf-id");
