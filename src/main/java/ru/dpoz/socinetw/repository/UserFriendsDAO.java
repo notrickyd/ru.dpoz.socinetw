@@ -72,7 +72,7 @@ public class UserFriendsDAO implements UserFriends
     {
         String SQL_FRIENDS =
                 "select u.age, u.city, u.first_name, u.gender, u.last_name, u.age, u.city, u.first_name, u.gender," +
-                        " u.last_name, u.id, " +
+                        " u.last_name, " +
                         "LOWER(CONCAT(" +
                         "   LEFT(HEX(u.user_id), 8), '-', " +
                         "   MID(HEX(u.user_id), 9, 4), '-', " +
