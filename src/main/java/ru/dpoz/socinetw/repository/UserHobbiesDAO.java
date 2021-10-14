@@ -29,7 +29,8 @@ public class UserHobbiesDAO implements UserHobbies
     @Override
     public void add(UUID userId, int hobbyId)
     {
-        String SQL_ADD = "insert into user_hobbies (user_id, hobby_id) values (F_UUID_TO_BIN(:uid), :hid);";
+        String SQL_ADD = "insert into user_hobbies (user_id, hobby_id) " +
+                "values (UNHEX(CONCAT(REPLACE(:uid, '-', ''))), :hid);";
         jdbc.update(SQL_ADD, new MapSqlParameterSource()
                 .addValue("uid", userId,  Types.VARCHAR)
                 .addValue("hid", hobbyId, Types.SMALLINT)
@@ -44,7 +45,7 @@ public class UserHobbiesDAO implements UserHobbies
         int i = 0;
         for (UserHobbiesEntity uh: usersHobbies) {
             i++;
-            SQL_BULK += MessageFormat.format("(F_UUID_TO_BIN(:uid{0}), :h{0}),", Integer.toString(i));
+            SQL_BULK += MessageFormat.format("(UNHEX(CONCAT(REPLACE(:uid{0}, '-', ''))), :h{0}),", Integer.toString(i));
             params
                     .addValue("uid" + Integer.toString(i), uh.getUserId(), Types.VARCHAR)
                     .addValue("h" + Integer.toString(i), uh.getHobbyId(), Types.VARCHAR);
@@ -57,7 +58,7 @@ public class UserHobbiesDAO implements UserHobbies
     {
         String SQL_GET = "select h.* from user_hobbies uh " +
                 "inner join hobby h on h.hobby_id = uh.hobby_id " +
-                "where uh.user_id = F_UUID_TO_BIN(:uid)";
+                "where uh.user_id = UNHEX(CONCAT(REPLACE(:uid, '-', '')))";
         return jdbc.query(
                 SQL_GET,
                 new MapSqlParameterSource().addValue("uid", userId,  Types.VARCHAR),

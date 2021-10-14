@@ -7,8 +7,6 @@ import ru.dpoz.socinetw.model.NewsFeedFriends;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.persistence.TemporalType;
-import java.sql.Types;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
@@ -23,14 +21,20 @@ public class NewsFeedCustomImpl implements NewsFeedCustom
     {
         String SQL =
                 "select nf.message as message, nf.timestampx as timestampx, concat(u.first_name, ' ', u.last_name) as name, "
-                        + "       F_BIN_TO_UUID(uf.friend_id) as user_id, nf.id as id "
-                        + "from user_friends uf "
-                        + "  inner join news_feed nf on nf.user_id = uf.friend_id "
-                        + "  inner join users u on u.user_id = uf.friend_id "
-                        + "where uf.user_id = F_UUID_TO_BIN(:user_id) "
-                        + "order by nf.timestampx desc";
+                + "LOWER(CONCAT("
+                + "   LEFT(HEX(uf.friend_id), 8), '-', "
+                + "   MID(HEX(uf.friend_id), 9, 4), '-', "
+                + "   MID(HEX(uf.friend_id), 13, 4), '-', "
+                + "   MID(HEX(uf.friend_id), 17, 4), '-', "
+                + "   RIGHT(HEX(uf.friend_id), 12))) as user_id, "
+                + "nf.id as id "
+                + "from user_friends uf "
+                + "  inner join news_feed nf on nf.user_id = uf.friend_id "
+                + "  inner join users u on u.user_id = uf.friend_id "
+                + "where uf.user_id = UNHEX(CONCAT(REPLACE(:uid, '-', ''))) "
+                + "order by nf.timestampx desc";
         Query query = em.createNativeQuery(SQL, "NewsFeedCustomImpl_FriendsQuery");
-        query.setParameter("user_id", userId.toString());
+        query.setParameter("uid", userId.toString());
         return (List<NewsFeedFriends>) query.getResultList();
     }
 
@@ -50,7 +54,13 @@ public class NewsFeedCustomImpl implements NewsFeedCustom
 
         String SQL =
                 "select nf.message as message, nf.timestampx as timestampx, concat(u.first_name, ' ', u.last_name) as name, " +
-                "       F_BIN_TO_UUID(nf.user_id) as user_id, nf.id as id " +
+                "   LOWER(CONCAT(" +
+                "       LEFT(HEX(nf.user_id), 8), '-', " +
+                "       MID(HEX(nf.user_id), 9, 4), '-', " +
+                "       MID(HEX(nf.user_id), 13, 4), '-', " +
+                "       MID(HEX(nf.user_id), 17, 4), '-', " +
+                "       RIGHT(HEX(nf.user_id), 12))) as user_id, " +
+                "   nf.id as id " +
                 "from (" + cteTable + ") as cte " +
                 "   inner join news_feed nf on nf.id = cte.id " +
                 "   inner join users u on u.user_id = nf.user_id ";

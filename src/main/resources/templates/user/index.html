@@ -30,7 +30,8 @@
         </a>
     </div>
     <br><br>
-    <b th:text="${username == '' ? 'Публикации' : 'Мои публикации'}"><br>
+
+    <b><th:block th:if="${username != ''}">Мои </th:block>Публикации</b><br>
     <hr/>
     <div th:each="feed: ${newsFeed}" th:class="feed">
         <span th:text="${feed.timestampx}" th:class="feed-timestamp"></span><br>
