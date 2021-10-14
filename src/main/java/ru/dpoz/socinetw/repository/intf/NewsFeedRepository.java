@@ -14,7 +14,7 @@ import java.util.UUID;
 public interface NewsFeedRepository extends CrudRepository<NewsFeedEntity, Long>, NewsFeedCustom
 {
     /** Кешируем собственную ленту новостей */
-    @Cacheable(value = "getSelfNewsData", key = "#userId.toString()")
+    @Cacheable(value = "getSelfNewsData", key = "#userId")
     List<NewsFeedEntity> findAllByUserIdOrderByTimestampxDesc(UUID userId);
 
     /** Получаем ленту новостей друзей пользователя */
@@ -23,13 +23,13 @@ public interface NewsFeedRepository extends CrudRepository<NewsFeedEntity, Long>
 
     /** Сбрасываем кеш своей ленты по юзер-ид */
     @Caching(evict = {
-            @CacheEvict(value = "getSelfNewsData", key = "#s.userId.toString()"),
+            @CacheEvict(value = "getSelfNewsData", key = "#s.userId"),
     })
     @Override
     <S extends NewsFeedEntity> S save(S s);
 
     /** Получаем ленту новостей друзей по ID-кешу новостей и авто-кешируем данные новостей */
-    @Cacheable(value = "getFriendsNewsFeedData", key = "#userId.toString()")
+    //@Cacheable(value = "getFriendsNewsFeedData", key = "#userId")
     @Override
     List<NewsFeedFriends> getNewsFeed(UUID userId, List<NewsFeedCacheItem> feedIdList);
 

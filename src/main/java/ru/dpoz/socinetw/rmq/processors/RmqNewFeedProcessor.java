@@ -1,8 +1,6 @@
 package ru.dpoz.socinetw.rmq.processors;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import ru.dpoz.socinetw.cache.AppCacheManager;
 import ru.dpoz.socinetw.cache.CacheNames;
 import ru.dpoz.socinetw.repository.intf.UserFriends;
@@ -34,9 +32,11 @@ public class RmqNewFeedProcessor extends RmqProcessor
         friends.forEach(
                 fid -> {
                     appCacheManager.appendFeedCache(CacheNames.FRIEND_FEED_IDS.name(), fid, (Long) message.getObject());
-                    appCacheManager.evictFriendsFeedCache(fid);
-                    RmqEventMessage event = new RmqEventMessage(EventMessageType.PREPARE_FEED_DATA_CACHE, fid, null);
-                    rmq.convertAndSend(RmqConfig.queueName, event);
+                    /* TODO Перестала работать инвалидация кеша {@link ru.dpoz.socinetw.repository.intf.NewsFeedRepository#getNewsFeed(UUID, List)}
+                     appCacheManager.evictFriendsFeedCache(fid);
+                     RmqEventMessage event = new RmqEventMessage(EventMessageType.PREPARE_FEED_DATA_CACHE, fid, null);
+                     rmq.convertAndSend(RmqConfig.getQueueName(), event);
+                    */
                 }
         );
     }

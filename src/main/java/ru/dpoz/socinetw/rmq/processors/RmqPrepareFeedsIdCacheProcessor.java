@@ -1,7 +1,5 @@
 package ru.dpoz.socinetw.rmq.processors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import ru.dpoz.socinetw.cache.AppCacheManager;
 import ru.dpoz.socinetw.cache.CacheNames;
 import ru.dpoz.socinetw.rmq.RmqEventMessage;

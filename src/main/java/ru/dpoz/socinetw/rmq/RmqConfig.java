@@ -1,6 +1,7 @@
 package ru.dpoz.socinetw.rmq;
 
 
+import org.apache.maven.properties.internal.EnvironmentUtils;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
@@ -12,11 +13,13 @@ import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.expression.EnvironmentAccessor;
+import org.springframework.core.env.Environment;
 
 @Configuration
 public class RmqConfig
 {
-    public final static String queueName = "cache-feed";
+    public static String queueName = "cache-feed";
     @Value("${spring.rabbitmq.host}")
     String rmqHost;
     @Value("${spring.rabbitmq.virtual-host}")
@@ -25,6 +28,11 @@ public class RmqConfig
     String rmqUser;
     @Value("${spring.rabbitmq.password}")
     String rmqPass;
+
+    public static String getQueueName()
+    {
+        return queueName;
+    }
 
     /** Настройка Очереди */
     @Bean
@@ -41,7 +49,7 @@ public class RmqConfig
     /** Настройка связи между топком и очередью */
     @Bean
     Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(queueName);
+        return BindingBuilder.bind(queue).to(exchange).with(getQueueName());
     }
 
     /** Настройка подключения */
@@ -60,7 +68,7 @@ public class RmqConfig
     {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        container.setQueueNames(queueName);
+        container.setQueueNames(getQueueName());
         container.setMessageListener(listenerAdapter);
         return container;
     }

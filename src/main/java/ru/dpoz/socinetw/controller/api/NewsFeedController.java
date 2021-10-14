@@ -55,7 +55,7 @@ public class NewsFeedController
             message.setUserId(userId);
             newsFeed.save(message);
             RmqEventMessage event = new RmqEventMessage(EventMessageType.POSTED_NEW_FEED, userId, message.getId());
-            rmq.convertAndSend(RmqConfig.queueName, event);
+            rmq.convertAndSend(RmqConfig.getQueueName(), event);
 
             return new RedirectResponseEntity("/user");
         }
