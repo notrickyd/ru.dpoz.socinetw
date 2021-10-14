@@ -25,7 +25,15 @@ public class UserSecretDAO implements UserSecret
     public UserSecretEntity findUsername(String username)
     {
         //TODO добавить Limit 1 после переезда на mySQL
-        String SQL_LOGIN_EXISTS = "select password, username, user_id from user_secret where username = :l";
+        String SQL_LOGIN_EXISTS = "select " +
+                "password, username, " +
+                "LOWER(CONCAT(" +
+                "   LEFT(HEX(user_id), 8), '-', " +
+                "   MID(HEX(user_id), 9, 4), '-', " +
+                "   MID(HEX(user_id), 13, 4), '-', " +
+                "   MID(HEX(user_id), 17, 4), '-', " +
+                "   RIGHT(HEX(user_id), 12))) as user_id " +
+                "from user_secret where username = :l";
         try {
             return jdbc.queryForObject(
                     SQL_LOGIN_EXISTS,
@@ -40,7 +48,7 @@ public class UserSecretDAO implements UserSecret
     @Override
     public void add(String username, String password, UUID userId)
     {
-        String SQL_ADD = "insert into user_secret (username, password, user_id) values (:l, :p, :uid);";
+        String SQL_ADD = "insert into user_secret (username, password, user_id) values (:l, :p, UNHEX(CONCAT(REPLACE(:uid, '-', ''))));";
         password = WebSecurityConfig.passwordEncoder().encode(password);
         jdbc.update(SQL_ADD, new MapSqlParameterSource()
                 .addValue("l", username, Types.VARCHAR)
@@ -65,7 +73,7 @@ public class UserSecretDAO implements UserSecret
         int i = 0;
         for (UserSecretEntity us: userSecrets) {
             i++;
-            SQL_BULK += MessageFormat.format("(:l{0}, :p{0}, :uid{0}),", Integer.toString(i));
+            SQL_BULK += MessageFormat.format("(:l{0}, :p{0}, UNHEX(CONCAT(REPLACE(:uid{0}, '-', '')))),", Integer.toString(i));
             params
                     .addValue("uid" + Integer.toString(i), us.getUserId(), Types.VARCHAR)
                     .addValue("l" + Integer.toString(i), us.getUsername(), Types.VARCHAR)

@@ -31,7 +31,7 @@ public class UserTokensDAO implements UserTokens
     @Override
     public UUID add(UUID userId)
     {
-        String SQL_ADD = "insert into user_tokens(token, user_id, expires) values (:t, :uid, :exp)";
+        String SQL_ADD = "insert into user_tokens(token, user_id, expires) values (:t, UNHEX(CONCAT(REPLACE(:uid, '-', ''))), :exp)";
         UUID token = UUID.randomUUID();
         Calendar date = DateUtils.createNow();
         date.add(Calendar.DATE, this.expireDays);

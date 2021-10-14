@@ -18,7 +18,7 @@ public class UserTokensEntity implements Serializable
     @GeneratedValue
     @Column(columnDefinition = "varchar(36) not null")
     UUID token;
-    @Column(columnDefinition = "varchar(36) not null")
+    @Column(columnDefinition = "binary(16) not null")
     UUID userId;
     @Column
     Timestamp expires;

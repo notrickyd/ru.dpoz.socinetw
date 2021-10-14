@@ -52,3 +52,22 @@ div.paginator {
     width: 100%;
    /* overflow-x: scroll;*/
 }
+
+div.feed{
+    padding-left: 10px;
+}
+
+div.feed .feed-message {
+    padding-bottom: 20px;
+}
+
+div.feed .feed-timestamp {
+    font-size: 10pt;
+    color: gray;
+}
+
+div.feed .feed-name {
+    font-size: 10pt;
+    color: black;
+    font-weight: bold;
+}

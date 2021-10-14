@@ -23,7 +23,8 @@ public class UserFriendsDAO implements UserFriends
     public boolean add(UUID userId, UUID friendId)
     {
         try {
-            String SQL_ADD = "insert into user_friends(user_id, friend_id) values(:uid, :fid)";
+            String SQL_ADD = "insert into user_friends(user_id, friend_id) " +
+                    "values(UNHEX(CONCAT(REPLACE(:uid, '-', ''))), UNHEX(CONCAT(REPLACE(:fid, '-', ''))))";
             jdbc.update(SQL_ADD,
                     new MapSqlParameterSource()
                             .addValue("uid", userId,  Types.VARCHAR)
@@ -38,7 +39,8 @@ public class UserFriendsDAO implements UserFriends
     @Override
     public void remove(UUID userId, UUID friendId)
     {
-        String SQL_REMOVE = "delete from user_friends where user_id = :uid and friend_id = :fid";
+        String SQL_REMOVE = "delete from user_friends " +
+                "where user_id = UNHEX(CONCAT(REPLACE(:uid, '-', ''))) and friend_id = UNHEX(CONCAT(REPLACE(:fid, '-', '')))";
         jdbc.update(SQL_REMOVE,
                 new MapSqlParameterSource()
                         .addValue("uid", userId,  Types.VARCHAR)
@@ -49,7 +51,15 @@ public class UserFriendsDAO implements UserFriends
     @Override
     public List<UUID> get(UUID userId)
     {
-        String SQL_FRIENDS = "select friend_id from user_friends where user_id = :uid";
+        String SQL_FRIENDS = "select " +
+                "LOWER(CONCAT(" +
+                "   LEFT(HEX(friend_id), 8), '-', " +
+                "   MID(HEX(friend_id), 9, 4), '-', " +
+                "   MID(HEX(friend_id), 13, 4), '-', " +
+                "   MID(HEX(friend_id), 17, 4), '-', " +
+                "   RIGHT(HEX(friend_id), 12))) as friend_id " +
+                "from user_friends " +
+                "where user_id = UNHEX(CONCAT(REPLACE(:uid, '-', '')))";
         return jdbc.queryForList(
                 SQL_FRIENDS,
                 new MapSqlParameterSource().addValue("uid", userId,  Types.VARCHAR),
@@ -61,9 +71,17 @@ public class UserFriendsDAO implements UserFriends
     public List<UserEntity> getUsers(UUID userId)
     {
         String SQL_FRIENDS =
-                "select u.* from user_friends uf " +
+                "select u.age, u.city, u.first_name, u.gender, u.last_name, u.age, u.city, u.first_name, u.gender," +
+                        " u.last_name, " +
+                        "LOWER(CONCAT(" +
+                        "   LEFT(HEX(u.user_id), 8), '-', " +
+                        "   MID(HEX(u.user_id), 9, 4), '-', " +
+                        "   MID(HEX(u.user_id), 13, 4), '-', " +
+                        "   MID(HEX(u.user_id), 17, 4), '-', " +
+                        "   RIGHT(HEX(u.user_id), 12))) as user_id " +
+                "from user_friends uf " +
                 "   inner join users u on u.user_id = uf.friend_id " +
-                "where uf.user_id = :uid";
+                "where uf.user_id = UNHEX(CONCAT(REPLACE(:uid, '-', '')))";
         return jdbc.query(
                 SQL_FRIENDS,
                 new MapSqlParameterSource().addValue("uid", userId,  Types.VARCHAR),

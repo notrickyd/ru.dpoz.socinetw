@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" th:src="@{/js/app.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/app.css}"/>
+    <title>Лента друзей</title>
+</head>
+<body>
+    <div th:replace="layout/header/menu-top :: menu-top"></div>
+    <b>Публикации друзей</b><br>
+    <hr/>
+    <div th:each="feed: ${newsFeed}" th:class="feed">
+        <span th:text="${#dates.format(feed.timestampx, 'dd-MMM-yy')}" th:class="feed-timestamp"></span>
+        <span th:text="${feed.name}" th:class="feed-name"></span><br>
+        <p th:text="${feed.message}" th:class="feed-message">
+        </p>
+    </div>
+</body>
+</html>

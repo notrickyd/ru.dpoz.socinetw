@@ -24,6 +24,6 @@ public class UserSecretEntity implements Serializable
     @Column(nullable = false)
     String password;
 
-    @Column(columnDefinition = "varchar(36) not null")
+    @Column(columnDefinition = "binary(16) not null")
     UUID userId;
 }

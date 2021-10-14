@@ -16,7 +16,7 @@ public class UserEntity
 {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(columnDefinition = "varchar(36) not null")
+    @Column(columnDefinition = "binary(16) not null")
     UUID userId;
 
     @Column(columnDefinition = "varchar(30) not null")

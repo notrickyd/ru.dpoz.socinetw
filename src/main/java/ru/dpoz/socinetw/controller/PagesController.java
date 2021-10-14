@@ -10,12 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.thymeleaf.util.DateUtils;
 import ru.dpoz.socinetw.SocinetwApplication;
+import ru.dpoz.socinetw.cache.AppCacheManager;
+import ru.dpoz.socinetw.cache.CacheNames;
+import ru.dpoz.socinetw.cache.NewsFeedCacheItem;
 import ru.dpoz.socinetw.model.HobbyEntity;
+import ru.dpoz.socinetw.model.NewsFeedEntity;
+import ru.dpoz.socinetw.model.NewsFeedFriends;
 import ru.dpoz.socinetw.model.UserEntity;
-import ru.dpoz.socinetw.repository.intf.Hobby;
-import ru.dpoz.socinetw.repository.intf.User;
-import ru.dpoz.socinetw.repository.intf.UserFriends;
-import ru.dpoz.socinetw.repository.intf.UserHobbies;
+import ru.dpoz.socinetw.repository.intf.*;
 import ru.dpoz.socinetw.security.UserSecretDetails;
 import ru.dpoz.socinetw.service.intf.AuthService;
 
@@ -37,6 +39,12 @@ public class PagesController
     private UserHobbies userHobbiesDAO;
     @Autowired
     private UserFriends userFriendsDAO;
+    @Autowired
+    private NewsFeedRepository newsFeedRepo;
+    @Autowired
+    AppCacheManager appCacheManager;
+
+
 
     @GetMapping("/")
     public String index(Model model)
@@ -80,6 +88,7 @@ public class PagesController
         UserEntity user = new UserEntity();
         List<UserEntity> friends = new ArrayList<>();
         List<HobbyEntity> hobbies = new ArrayList<>();
+        Iterable<NewsFeedEntity> newsFeed = new ArrayList<>();
         UserSecretDetails currentUser = authService.getCurrentUser();
         boolean willViewSelf = userId == null;
         // Просмотр личного профиля, иначе - профиль другого пользователя
@@ -97,11 +106,13 @@ public class PagesController
             user = this.userDAO.get(userId);
             hobbies = this.userHobbiesDAO.get(userId);
             friends = this.userFriendsDAO.getUsers(userId);
+            newsFeed = newsFeedRepo.findAllByUserIdOrderByTimestampxDesc(userId);
         }
         model.addAttribute("username", username);
         model.addAttribute("user", user);
         model.addAttribute("hobbies", hobbies);
         model.addAttribute("friends", friends);
+        model.addAttribute("newsFeed", newsFeed);
         return "user/index";
     }
 
@@ -160,18 +171,56 @@ public class PagesController
         return "users/search/usersSearchResult :: usersSearchResult";
     }
 
-
-    @GetMapping (path="/users/lenta", produces = MediaType.TEXT_HTML_VALUE)
-    public String lenta()
-    {
-        return "";
-    }
-
     @GetMapping("/signupbulk")
     public String random(Model model)
     {
         return "signupbulk/index";
     }
 
+    /**
+     * Возвращает страницу ленты новостей (посты друзей) пользоватевля.
+     * Кешируется и кеш автоматически прогревается при первом обращении.
+     *
+     * @return String Шаблон страницы
+     * @param model Модель
+     */
+    @GetMapping (path = "/feed", produces = MediaType.TEXT_HTML_VALUE)
+    public String feed(Model model)
+    {
+        UUID userId = authService.getCurrentUser().getUserSecretEntity().getUserId();
+        if (userId == null)
+            return "redirect:/signin";
+        List<NewsFeedCacheItem> cachedFeeds = appCacheManager.getFeedCache(CacheNames.FRIEND_FEED_IDS.name(), userId);
+        if (cachedFeeds.size() == 0)
+            cachedFeeds = appCacheManager.fillFeedCache(CacheNames.FRIEND_FEED_IDS.name(), userId);
+        List<NewsFeedFriends> newsFeed = this.newsFeedRepo.getNewsFeed(userId, cachedFeeds);
+        model.addAttribute("newsFeed", newsFeed);
+        return "feed/index";
+    }
+
+    /**
+     * Возвращает страницу для добавления новости
+     *
+     * @return String Шаблон страницы
+     */
+    @GetMapping(path = "/feed/add", produces = MediaType.TEXT_HTML_VALUE)
+    public String feedAdd()
+    {
+        return "feed/add";
+    }
+
+
+    /* Можно раскомментировать если требуется вручную запускать и проверять холодный старт кеша для авторизованного пользователя
+    @Autowired
+    RabbitTemplate rabbitTemplate;
+
+    @GetMapping("/rmq")
+    public BasicResponseEntity rmq() throws InterruptedException
+    {
+        UUID userId = authService.getCurrentUser().getUserSecretEntity().getUserId();
+        rabbitTemplate.convertAndSend("cache-feed", new RmqEventMessage(EventMessageType.PREPARE_FEED_ID_CACHE, userId, null));
+        rabbitTemplate.convertAndSend("cache-feed", new RmqEventMessage(EventMessageType.PREPARE_FEED_DATA_CACHE, userId, null));
+        return new OkResponseEntity("", null);
+    } */
 
 }

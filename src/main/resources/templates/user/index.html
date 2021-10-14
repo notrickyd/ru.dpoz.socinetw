@@ -29,6 +29,14 @@
            th:href="'/user/' + ${friend.userId}">
         </a>
     </div>
-    <br>
+    <br><br>
+
+    <b><th:block th:if="${username != ''}">Мои </th:block>Публикации</b><br>
+    <hr/>
+    <div th:each="feed: ${newsFeed}" th:class="feed">
+        <span th:text="${feed.timestampx}" th:class="feed-timestamp"></span><br>
+        <p th:text="${feed.message}" th:class="feed-message">
+        </p>
+    </div>
 </body>
 </html>
