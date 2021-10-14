@@ -13,7 +13,7 @@
     <b>Публикации друзей</b><br>
     <hr/>
     <div th:each="feed: ${newsFeed}" th:class="feed">
-        <span th:text="${#dates.format(feed.timestampx, 'HH:mm dd-MMM-yy')}" th:class="feed-timestamp"></span>
+        <span th:text="${#dates.format(feed.timestampx, 'dd-MMM-yy')}" th:class="feed-timestamp"></span>
         <span th:text="${feed.name}" th:class="feed-name"></span><br>
         <p th:text="${feed.message}" th:class="feed-message">
         </p>

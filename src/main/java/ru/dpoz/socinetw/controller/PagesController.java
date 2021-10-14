@@ -4,12 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.thymeleaf.util.DateUtils;
 import ru.dpoz.socinetw.SocinetwApplication;
-import ru.dpoz.socinetw.model.NewsFeedFriends;
+import ru.dpoz.socinetw.cache.AppCacheManager;
+import ru.dpoz.socinetw.cache.CacheNames;
+import ru.dpoz.socinetw.cache.NewsFeedCacheItem;
 import ru.dpoz.socinetw.model.HobbyEntity;
 import ru.dpoz.socinetw.model.NewsFeedEntity;
+import ru.dpoz.socinetw.model.NewsFeedFriends;
 import ru.dpoz.socinetw.model.UserEntity;
 import ru.dpoz.socinetw.repository.intf.*;
 import ru.dpoz.socinetw.security.UserSecretDetails;
@@ -35,6 +41,9 @@ public class PagesController
     private UserFriends userFriendsDAO;
     @Autowired
     private NewsFeedRepository newsFeedRepo;
+    @Autowired
+    AppCacheManager appCacheManager;
+
 
 
     @GetMapping("/")
@@ -168,24 +177,50 @@ public class PagesController
         return "signupbulk/index";
     }
 
-    /** Лента новостей (посты друзей) пользоватевля */
-    @GetMapping (path="/feed", produces = MediaType.TEXT_HTML_VALUE)
+    /**
+     * Возвращает страницу ленты новостей (посты друзей) пользоватевля.
+     * Кешируется и кеш автоматически прогревается при первом обращении.
+     *
+     * @return String Шаблон страницы
+     * @param model Модель
+     */
+    @GetMapping (path = "/feed", produces = MediaType.TEXT_HTML_VALUE)
     public String feed(Model model)
     {
         UUID userId = authService.getCurrentUser().getUserSecretEntity().getUserId();
         if (userId == null)
             return "redirect:/signin";
-        List<NewsFeedFriends> newsFeed = this.newsFeedRepo.getFriendsNewsFeed(userId);
+        List<NewsFeedCacheItem> cachedFeeds = appCacheManager.getFeedCache(CacheNames.FRIEND_FEED_IDS.name(), userId);
+        if (cachedFeeds.size() == 0)
+            cachedFeeds = appCacheManager.fillFeedCache(CacheNames.FRIEND_FEED_IDS.name(), userId);
+        List<NewsFeedFriends> newsFeed = this.newsFeedRepo.getNewsFeed(userId, cachedFeeds);
         model.addAttribute("newsFeed", newsFeed);
         return "feed/index";
     }
 
+    /**
+     * Возвращает страницу для добавления новости
+     *
+     * @return String Шаблон страницы
+     */
     @GetMapping(path = "/feed/add", produces = MediaType.TEXT_HTML_VALUE)
     public String feedAdd()
     {
-
         return "feed/add";
     }
 
+
+    /* Можно раскомментировать если требуется вручную запускать и проверять холодный старт кеша для авторизованного пользователя
+    @Autowired
+    RabbitTemplate rabbitTemplate;
+
+    @GetMapping("/rmq")
+    public BasicResponseEntity rmq() throws InterruptedException
+    {
+        UUID userId = authService.getCurrentUser().getUserSecretEntity().getUserId();
+        rabbitTemplate.convertAndSend("cache-feed", new RmqEventMessage(EventMessageType.PREPARE_FEED_ID_CACHE, userId, null));
+        rabbitTemplate.convertAndSend("cache-feed", new RmqEventMessage(EventMessageType.PREPARE_FEED_DATA_CACHE, userId, null));
+        return new OkResponseEntity("", null);
+    } */
 
 }

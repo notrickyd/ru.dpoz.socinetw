@@ -23,7 +23,7 @@ public class UserFriendsDAO implements UserFriends
     public boolean add(UUID userId, UUID friendId)
     {
         try {
-            String SQL_ADD = "insert into user_friends(user_id, friend_id) values(:uid, :fid)";
+            String SQL_ADD = "insert into user_friends(user_id, friend_id) values(F_UUID_TO_BIN(:uid), F_UUID_TO_BIN(:fid))";
             jdbc.update(SQL_ADD,
                     new MapSqlParameterSource()
                             .addValue("uid", userId,  Types.VARCHAR)
@@ -38,7 +38,7 @@ public class UserFriendsDAO implements UserFriends
     @Override
     public void remove(UUID userId, UUID friendId)
     {
-        String SQL_REMOVE = "delete from user_friends where user_id = :uid and friend_id = :fid";
+        String SQL_REMOVE = "delete from user_friends where user_id = F_UUID_TO_BIN(:uid) and friend_id = F_UUID_TO_BIN(:fid)";
         jdbc.update(SQL_REMOVE,
                 new MapSqlParameterSource()
                         .addValue("uid", userId,  Types.VARCHAR)
@@ -49,7 +49,7 @@ public class UserFriendsDAO implements UserFriends
     @Override
     public List<UUID> get(UUID userId)
     {
-        String SQL_FRIENDS = "select friend_id from user_friends where user_id = :uid";
+        String SQL_FRIENDS = "select F_BIN_TO_UUID(friend_id) as friend_id from user_friends where user_id = F_UUID_TO_BIN(:uid)";
         return jdbc.queryForList(
                 SQL_FRIENDS,
                 new MapSqlParameterSource().addValue("uid", userId,  Types.VARCHAR),
@@ -61,9 +61,10 @@ public class UserFriendsDAO implements UserFriends
     public List<UserEntity> getUsers(UUID userId)
     {
         String SQL_FRIENDS =
-                "select u.* from user_friends uf " +
+                "select u.age, u.city, u.first_name, u.gender, u.last_name, u.age, u.city, u.first_name, u.gender," +
+                        " u.last_name, u.id, F_BIN_TO_UUID(u.user_id) as user_id from user_friends uf " +
                 "   inner join users u on u.user_id = uf.friend_id " +
-                "where uf.user_id = :uid";
+                "where uf.user_id = F_UUID_TO_BIN(:uid)";
         return jdbc.query(
                 SQL_FRIENDS,
                 new MapSqlParameterSource().addValue("uid", userId,  Types.VARCHAR),

@@ -1,24 +1,36 @@
 package ru.dpoz.socinetw.repository.intf;
 
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
-import ru.dpoz.socinetw.model.NewsFeedFriends;
+import ru.dpoz.socinetw.cache.NewsFeedCacheItem;
 import ru.dpoz.socinetw.model.NewsFeedEntity;
+import ru.dpoz.socinetw.model.NewsFeedFriends;
 
 import java.util.List;
 import java.util.UUID;
 
-public interface NewsFeedRepository extends CrudRepository<NewsFeedEntity, Long>
+public interface NewsFeedRepository extends CrudRepository<NewsFeedEntity, Long>, NewsFeedCustom
 {
-    Iterable<NewsFeedEntity> findAllByUserIdOrderByTimestampxDesc(UUID userId);
+    /** Кешируем собственную ленту новостей */
+    @Cacheable(value = "getSelfNewsData", key = "#userId")
+    List<NewsFeedEntity> findAllByUserIdOrderByTimestampxDesc(UUID userId);
 
-    // TODO Переделать все uuid на binary(16)
-    @Query(value =  "select nf.message, nf.timestampx, concat(u.first_name, ' ', u.last_name) name " +
-                    "from user_friends uf " +
-                    "  inner join news_feed nf on nf.user_id = F_UUID_TO_BIN(uf.friend_id) " +
-                    "  inner join users u on u.user_id = uf.friend_id " +
-                    "where uf.user_id = F_BIN_TO_UUID(:user_id) " +
-                    "order by nf.timestampx desc", nativeQuery = true)
-    List<NewsFeedFriends> getFriendsNewsFeed(@Param("user_id") UUID userId);
+    /** Получаем ленту новостей друзей пользователя */
+    @Override
+    List<NewsFeedFriends> getFriendsNewsFeed(UUID userId);
+
+    /** Сбрасываем кеш своей ленты по юзер-ид */
+    @Caching(evict = {
+            @CacheEvict(value = "getSelfNewsData", key = "#s.userId"),
+    })
+    @Override
+    <S extends NewsFeedEntity> S save(S s);
+
+    /** Получаем ленту новостей друзей по ID-кешу новостей и авто-кешируем данные новостей */
+    @Cacheable(value = "getFriendsNewsFeedData", key = "#userId")
+    @Override
+    List<NewsFeedFriends> getNewsFeed(UUID userId, List<NewsFeedCacheItem> feedIdList);
+
 }

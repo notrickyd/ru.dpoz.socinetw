@@ -17,9 +17,9 @@ import java.util.UUID;
 public class UserFriendsEntity implements Serializable
 {
     @Id
-    @Column(columnDefinition = "varchar(36) not null")
+    @Column(columnDefinition = "binary(16) not null")
     UUID userId;
     @Id
-    @Column(columnDefinition = "varchar(36) not null")
+    @Column(columnDefinition = "binary(16) not null")
     UUID friendId;
 }

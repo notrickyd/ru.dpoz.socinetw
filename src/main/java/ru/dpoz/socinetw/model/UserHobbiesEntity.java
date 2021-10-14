@@ -22,7 +22,7 @@ public class UserHobbiesEntity implements Serializable
     public UserHobbiesEntity(){super();}
 
     @Id
-    @Column(columnDefinition = "varchar(36) not null")
+    @Column(columnDefinition = "binary(16) not null")
     UUID userId;
 
     @Id

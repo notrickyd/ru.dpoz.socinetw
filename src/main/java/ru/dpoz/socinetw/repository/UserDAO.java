@@ -32,7 +32,7 @@ public class UserDAO implements User
     {
         UUID newId = UUID.randomUUID();
         String SQL_ADD = "insert into users (user_id, first_name, last_name, age, gender, city) " +
-                "values (:uid, :first, :last, :age, :gender, :city)";
+                "values (F_UUID_TO_BIN(:uid), :first, :last, :age, :gender, :city)";
         jdbc.update(SQL_ADD,
                 new MapSqlParameterSource()
                         .addValue("uid", newId, Types.VARCHAR)
@@ -54,7 +54,7 @@ public class UserDAO implements User
         int i = 0;
         for (UserEntity u: users) {
             i++;
-            SQL_BULK += MessageFormat.format("(:uid{0}, :first{0}, :last{0}, :age{0}, :gender{0}, :city{0}),", Integer.toString(i));
+            SQL_BULK += MessageFormat.format("(F_UUID_TO_BIN(:uid{0}), :first{0}, :last{0}, :age{0}, :gender{0}, :city{0}),", Integer.toString(i));
             u.setUserId(UUID.randomUUID());
             userIds.add(u.getUserId());
             params
@@ -84,7 +84,8 @@ public class UserDAO implements User
     public List<UserEntity> getAll(Integer page)
     {
         Integer rowno = page * 100;
-        String SQL_GET_ALL = "select * from users order by first_name, last_name limit " + rowno.toString() + ", 100;";
+        String SQL_GET_ALL = "select F_BIN_TO_UUID(user_id) as user_id, age, city, first_name, gender, last_name " +
+                "from users order by first_name, last_name limit " + rowno.toString() + ", 100;";
         return jdbc.query(
                 SQL_GET_ALL,
                 new MapSqlParameterSource(),
@@ -97,7 +98,8 @@ public class UserDAO implements User
     {
         first = SqlUtils.prepareParam(first) + '%';
         last = SqlUtils.prepareParam(last) + '%';
-        String SQL_FIND = "select * from users where first_name like :first and last_name like :last order by user_id";
+        String SQL_FIND = "select F_BIN_TO_UUID(user_id) as user_id, age, city, first_name, gender, last_name " +
+                "from users where first_name like :first and last_name like :last order by user_id";
 
         return jdbc.query(
                 SQL_FIND,
@@ -109,7 +111,8 @@ public class UserDAO implements User
     @Override
     public UserEntity get(UUID userId)
     {
-        String SQL_GET = "select * from users where user_id = :uid";
+        String SQL_GET = "select F_BIN_TO_UUID(user_id) as user_id, age, city, first_name, gender, last_name " +
+                "from users where user_id = F_UUID_TO_BIN(:uid)";
         return jdbc.queryForObject(
                 SQL_GET,
                 new MapSqlParameterSource().addValue("uid", userId,  Types.VARCHAR),
